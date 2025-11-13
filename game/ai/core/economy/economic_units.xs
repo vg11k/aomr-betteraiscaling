@@ -1403,10 +1403,105 @@ minInterval 10
 
          // We only take the Villager count because if we train Caravans/Fishing Ships we lower the amount of Villagers we want
          // in the actual plan accordingly. So just the flat Villager count is a proper representation of our total eco wants.
-         int numVillagers = getBaseVillagerCountToMaintainOtherAges();
-         gMaxMilitaryPop = numVillagers * gMilitaryToEcoRatio;
-         debugEconomicUnits("We have a lot of resources, unlocking gMaxMilitaryPop as if we had our max alllowed economic pop: " +
-            numVillagers + " * " + gMilitaryToEcoRatio + ": " + gMaxMilitaryPop + ".");
+		 
+		 
+		 //VG
+		 //more players so more max pop so lets be more agressive
+		 
+		 //kinda want to unleach only if 
+		 int nbTC = gTCBases.size();
+		 int thirdPlayers = cNumberPlayers / 3;
+		 
+		 //otherwise it doesn't take into account caravan or boats
+		 int numBoats = kbUnitCount(gFishingUnit, cMyID, cUnitStateAlive);
+		 int numCaravans = kbUnitCount(gCaravanUnit, cMyID, cUnitStateAlive);
+		 int numVillagers = getBaseVillagerCountToMaintainOtherAges();
+		 int economicPolulation  = numVillagers + numCaravans + numBoats;
+		 
+		 //debugEconomicUnits("ARMY SCALING COUNT MOD ressources excess overload of " + excessRessourcesOverload);
+		 debugEconomicUnits("ARMY SCALING COUNT MOD holding " + nbTC + " TC for " + thirdPlayers + " treshold (third of players) to increase army scale count"); 
+		 if(nbTC >= thirdPlayers) {
+		 //if(haveExcessResourceAmount(excessRessourcesOverload, cAllResources) == true && nbTC >= thirdPlayers) {
+			 
+			 debugEconomicUnits("ARMY SCALING COUNT MOD we are soo late game and piling gold, lets steamroll a bit"); 
+			 
+			 float foodStockPile = -gResourceNeeds[cResourceFood];
+			 float woodStockPile = -gResourceNeeds[cResourceWood];
+			 float goldStockPile = -gResourceNeeds[cResourceGold];
+			 
+			 float minStockPile = foodStockPile;
+			 if(woodStockPile < minStockPile) {
+				 minStockPile = woodStockPile;
+			 }
+			 if(goldStockPile < minStockPile) {
+				minStockPile = goldStockPile;
+			 }
+			 
+			 debugEconomicUnits("ARMY SCALING COUNT MOD min stock pile : " + minStockPile);
+			 
+			 minStockPile = minStockPile - 2000.0;
+			 
+			 float referenceStockPile = selectByDifficulty(20000, 15000, 10000) * 1.0;
+			 if(referenceStockPile < minStockPile) {
+				 minStockPile = referenceStockPile;
+			 }
+			 
+			 //base ratio is 1.5, lets go from 1.5 to max 4.0 so an increase max of 2.5 with 12 players
+			 
+			 float baseMilitaryRatioMaxOverflow = 2.5;
+			 float fnumberPlayers = cNumberPlayers;
+			 float linearRepartitionByNumplayer = fnumberPlayers / 12.0;
+			 float linearRepartitionByStockPile = minStockPile / referenceStockPile;
+			 
+			 //from max tc in building_economics
+			 int nbMaxTC = cNumberPlayers * 3;
+			 int nbMaxVC = cNumberPlayers * 2;
+			 int nbTCEasy = nbMaxVC / 3;
+			 int nbTCMedium = nbMaxVC / 2;
+			 int nbTCHard = nbMaxTC / 2;
+			 float maxTownCenters = selectByDifficulty(nbTCEasy, nbTCMedium, nbTCHard);
+			 float fnbtc = nbTC;
+			 float linearRepartitionByTc = fnbtc / maxTownCenters;
+			 
+			 float bestLinearBtwStickPileNTC = linearRepartitionByStockPile;
+			 float worstLinearBtwStockPileNTC = linearRepartitionByTc;
+			 if(worstLinearBtwStockPileNTC > linearRepartitionByStockPile) {
+				 worstLinearBtwStockPileNTC = linearRepartitionByStockPile;
+				 bestLinearBtwStickPileNTC = linearRepartitionByTc;
+			 }
+			 
+			 float militaryRatioMaxOverflow = baseMilitaryRatioMaxOverflow * linearRepartitionByNumplayer * worstLinearBtwStockPileNTC;
+			 float alternativeMilitaryRatioMaxOverflow = baseMilitaryRatioMaxOverflow * linearRepartitionByNumplayer * bestLinearBtwStickPileNTC;
+			 float maxmaxRatioOverflow = baseMilitaryRatioMaxOverflow * linearRepartitionByNumplayer;//only player count holding me
+			 
+			 debugEconomicUnits("ARMY SCALING COUNT MOD linearRepartitionByNumplayer : " + linearRepartitionByNumplayer + " x worst between LRByStockPile " + linearRepartitionByStockPile + " & LRByPercentTc " + linearRepartitionByTc);
+			 
+			 float militaryToEcoRatioToUse = gMilitaryToEcoRatio + militaryRatioMaxOverflow;
+			 float alternativeM2ERatio = gMilitaryToEcoRatio + alternativeMilitaryRatioMaxOverflow;
+			 float maxmaxEcoToRatioToUse = gMilitaryToEcoRatio + maxmaxRatioOverflow;
+			 
+			 gMaxMilitaryPop = economicPolulation * militaryToEcoRatioToUse;
+			 int vanillaMaxMilitaryPop = economicPolulation * 1.5;
+			 int maxMilitaryAlternativePop = economicPolulation * alternativeM2ERatio;
+			 int maxmaxMilitaryPop = economicPolulation * maxmaxEcoToRatioToUse;
+			 
+			 debugEconomicUnits("ARMY SCALING COUNT MOD We have a looooooot of resources, unlocking gMaxMilitaryPop over our max alllowed economic pop: " +
+				economicPolulation + " * " + militaryToEcoRatioToUse + " = " + gMaxMilitaryPop + ".");
+			 debugEconomicUnits("ARMY SCALING COUNT MOD alternative ratio would have been " + alternativeM2ERatio + " for " + maxMilitaryAlternativePop + " military pop.");
+			 debugEconomicUnits("ARMY SCALING COUNT MOD max ratio would have been " + maxmaxEcoToRatioToUse + " for " + maxmaxMilitaryPop + " military pop.");
+			 debugEconomicUnits("ARMY SCALING COUNT MOD vanilla ratio 1.5 for " + vanillaMaxMilitaryPop + " military pop");
+
+		 }
+		 else {
+			 //int numVillagers = getBaseVillagerCountToMaintainOtherAges();
+			 //added boat & caravan here too, otherwise it can be less than the next else...
+			 //gMaxMilitaryPop = numVillagers * gMilitaryToEcoRatio;
+			 //debugEconomicUnits("We have a lot of resources, unlocking gMaxMilitaryPop as if we had our max alllowed economic pop: " +
+			 //numVillagers + " * " + gMilitaryToEcoRatio + ": " + gMaxMilitaryPop + ".");
+			 gMaxMilitaryPop = economicPolulation * gMilitaryToEcoRatio;
+			 debugEconomicUnits("We have a lot of resources, unlocking gMaxMilitaryPop as if we had our max alllowed economic pop: " +
+				economicPolulation + " * " + gMilitaryToEcoRatio + ": " + gMaxMilitaryPop + ".");
+		 }
       }
       // Base the max military pop on our current economy.
       else
