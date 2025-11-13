@@ -57,8 +57,8 @@ Enjoy.
     <td width="50%"><img src="/assets/TC modded chart.JPG"></td>
   </tr>
   <tr>
-    <td width="50%"><div style="text-align:center;">Vanilla max colony by nb players and difficulties</div></td>
-    <td width="50%"><div style="text-align:center;">Modded max colony by nb players and difficulties</div></td>
+    <td width="50%"><div align="center">Vanilla max colony by nb players and difficulties</div></td>
+    <td width="50%"><div align="center">Modded max colony by nb players and difficulties</div></td>
   </tr>
 </table>
 
@@ -70,8 +70,8 @@ Enjoy.
     <td width="50%"><img src="/assets/TC ranged modded chart.JPG"></td>
   </tr>
   <tr>
-    <td width="50%"><div style="text-align:center;">Vanilla distance max between colony and main town by nb players</div></td>
-    <td width="50%"><div style="text-align:center;">Modded distance max between colony and main town by nb players</div></td>
+    <td width="50%"><div align="center">Vanilla distance max between colony and main town by nb players</div></td>
+    <td width="50%"><div align="center">Modded distance max between colony and main town by nb players</div></td>
   </tr>
 </table>
 
@@ -83,8 +83,8 @@ Enjoy.
     <td width="50%"><img src="/assets/Villagers modded pop chart.JPG"></td>
   </tr>
   <tr>
-    <td width="50%"><div style="text-align:center;">Vanilla max villagers by nb player and difficulties<br> (cap 100)</div></td>
-    <td width="50%"><div style="text-align:center;">Modded max villagers by nb player & difficulties<br>(cap 100)</div></td>
+    <td width="50%"><div align="center">Vanilla max villagers by nb player and difficulties<br> (cap 100)</div></td>
+    <td width="50%"><div align="center">Modded max villagers by nb player & difficulties<br>(cap 100)</div></td>
   </tr>
 </table>
 
@@ -98,9 +98,9 @@ Enjoy.
     <td width="50%"><img src="/assets/Military modded pop chart.JPG"></td>
   </tr>
   <tr>
-    <td width="50%"><div style="text-align:center;">Vanilla max military unit by nb players and difficulty<br>
+    <td width="50%"><div align="center">Vanilla max military unit by nb players and difficulty<br>
 (no caravan no fishing boat for the example)</div></td>
-    <td width="50%"><div style="text-align:center;">Modded max military unit by nb players and difficulty<br>
+    <td width="50%"><div align="center">Modded max military unit by nb players and difficulty<br>
 if stockpile > 2000 & built TC < (nb players / 3)<br>
 (no caravan no fishing boat for the example)</div></td>
   </tr>
@@ -113,7 +113,7 @@ if stockpile > 2000 & built TC < (nb players / 3)<br>
     <td><img src="/assets/Military modded hard difficulty incr chart.JPG"></td>
   </tr>
   <tr>
-    <td><div style="text-align:center;">Modded max military unit by nb players for HARD AI<br>
+    <td><div align="center">Modded max military unit by nb players for HARD AI<br>
 if stockpile > 2k & built TC >= (nb players / 3).<br>
 Scaling from smallest ratio between<br>
 resources (stockpile/10k ) & TC(current/max buildable)<br>
