@@ -733,13 +733,56 @@ minInterval 30
    {
       searchRange = 200.0;
    }
-   // Passive can't expand too far away.
-   if (cPersonalityCurrent != cPersonalityPassive && cDifficultyCurrent >= cDifficultyTitan && currentAge >= cAge4 &&
-       haveExcessResourceAmount(1000.0) == true)
+   
+   //VG11K
+   //map 2 players normal = 250 side / 350 diag
+   //map 12 players normal = 600 side / 850 diag
+   //+50 by players
+   
+   //map 2 players large = 467
+   //map 12 players large = 1133
+   //+60,5 by players
+   
+   //vanilla 150 on 2 players on easy = 150/350 = 0.4286
+   //with 850 diag it is 850 * 0.4286 = 364.31
+   
+   float mapDiagonal = 350;
+   float mapDiagIncrByPlayer = 50;
+   float vanillaSearchDistanceByMapDiagonal = 150.0 / mapDiagonal;
+   if (cMapSizeCurrent == cMapSizeLarge)
    {
-      // So yes this can rekt our defending/gathering but will also give as extra pop that we may need.
-      debugEconomicBuildings("Removing maximum search range for an unclaimed Settlement since we're in very lategame.");
-      searchRange = cMaxFloat;
+	  mapDiagonal = 467;
+	  mapDiagIncrByPlayer = 60.5;
+	  vanillaSearchDistanceByMapDiagonal = 200.0 / mapDiagonal;
+   }
+   
+   float mapDiagonalRatio = mapDiagonal + (cNumberPlayers - 2) * mapDiagIncrByPlayer;
+  
+   float factorDifficulty = 1.0 + (selectByDifficulty(0, 1, 2, 3, 4, 5) / 10.0);
+   float moddedDistance = searchRange * factorDifficulty + (cNumberPlayers - 2) * vanillaSearchDistanceByMapDiagonal  * mapDiagIncrByPlayer;
+   float debugDistancePercentageOfDiagonale = moddedDistance / mapDiagonalRatio;
+      
+   searchRange = moddedDistance;
+   debugEconomicBuildings("TC SCALING RANGE MOD limit range of : " + searchRange + " ( " + debugDistancePercentageOfDiagonale + "percent of diagonal)");
+   debugEconomicBuildings("TC SCALING RANGE MOD vanilla limit range is 150 (200 if large map)");
+   
+   // Passive can't expand too far away.
+   if (cPersonalityCurrent != cPersonalityPassive && currentAge >= cAge4 && haveExcessResourceAmount(1000.0) == true) {
+	    // So yes this can rekt our defending/gathering but will also give as extra pop that we may need.
+		if(cDifficultyCurrent >= cDifficultyTitan) {
+		  debugEconomicBuildings("Removing maximum search range for an unclaimed Settlement since we're in very lategame.");
+		  searchRange = cMaxFloat;
+		}
+		else if(cDifficultyCurrent == cDifficultyHard || cDifficultyCurrent == cDifficultyModerate){
+			debugEconomicBuildings("TC SCALING RANGE MOD Increasing maximum search range for an unclaimed Settlement since we're in very lategame.");
+			
+			factorDifficulty = factorDifficulty + 0.3;
+			moddedDistance = searchRange * factorDifficulty + (cNumberPlayers - 2) * vanillaSearchDistanceByMapDiagonal  * mapDiagIncrByPlayer;
+			debugDistancePercentageOfDiagonale = moddedDistance / mapDiagonalRatio;
+			
+			searchRange = moddedDistance;
+			debugEconomicBuildings("TC SCALING RANGE MOD Final value is " + searchRange + " ( " + debugDistancePercentageOfDiagonale + "percent of diagonale)");
+		}
    }
 
    // We must have a valid mainbase here.
