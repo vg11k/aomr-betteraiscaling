@@ -16,7 +16,25 @@ int gMaxNumberVillagersDueToIdle = -1;
 //==============================================================================
 int getBaseVillagerCountToMaintainOtherAges()
 {
-   return selectByDifficulty(16, 30, 50, 75, 100, 100);
+   //VG11K
+   //return selectByDifficulty(16, 30, 50, 75, 100, 100);
+   debugEconomicUnits("VILLAGER SCALING COUNT MOD there are " + cNumberPlayers + " players !");
+   
+   //assert there are 2 colonies by player plus main tc so lots of pop max
+   //especially with TC SCALING COUNT MOD
+   //100 is always the max
+   int nbPlayerFactor = (cNumberPlayers - 2);
+   
+   int easyValue = 16 + nbPlayerFactor;
+   int medValue = 30 + 7 + nbPlayerFactor;
+   int hardValue = 50 + 15 + nbPlayerFactor;
+   int titanValue = 75 + 15 + nbPlayerFactor;
+   int extremValue = 100;
+   int legendaryValue = 100;
+   
+   debugEconomicUnits("VILLAGER SCALING COUNT MOD max villager : [" + easyValue + "easy] [" + medValue + "medium] [" + hardValue + "hard] [" + titanValue + "titan] [" + extremValue + "extrem] [" + legendaryValue + "legend]");
+      debugEconomicUnits("VILLAGER SCALING COUNT MOD vanilla was max villager : [16 easy] [30 medium] [50 hard] [75 titan] [100 extreme] [100 legend]");
+   return selectByDifficulty(easyValue, medValue, hardValue, titanValue, extremValue, legendaryValue);
 }
 
 //==============================================================================
