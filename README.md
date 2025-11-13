@@ -49,6 +49,13 @@ Feel free to ping me on the #myth-modding channel in the official AoE discord if
 
 Enjoy.
 
-|![Vanilla chart of TC count evolution by players](/assets/TC vanilla chart.JPG)|![Modded chart of TC count evolution by players](/assets/TC modded chart.JPG)|
-|--|--|
-|Vanilla max colony by nb players and difficulties|Modded max colony by nb players and difficulties |
+<table>
+  <tr>
+    <td><img src="/assets/TC vanilla chart.JPG"></td>
+    <td><img src="/assets/TC modded chart.JPG"></td>
+  </tr>
+  <tr>
+    <td><img src="Vanilla max colony by nb players and difficulties"></td>
+    <td><img src="Modded max colony by nb players and difficulties"></td>
+  </tr>
+</table>
