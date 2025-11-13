@@ -489,7 +489,22 @@ minInterval 30
    int numAliveTC = gTCBases.size();
    if (cDifficultyCurrent <= cDifficultyHard)
    {
-      int maxTownCenters = selectByDifficulty(1, 2, 3);
+	  //int maxTownCenters = selectByDifficulty(1, 2, 3);
+	  //VG11K
+	  //debugEconomicBuildings("There are " + cNumberPlayers + " players in the game ! ");
+	  
+	  //assert there are 2 colonies by player plus main tc
+	  int nbMaxTC = cNumberPlayers * 3;
+	  int nbMaxVC = cNumberPlayers * 2;
+	  
+	  int nbTCEasy = nbMaxVC / 3;
+	  int nbTCMedium = nbMaxVC / 2;
+	  int nbTCHard = nbMaxTC / 2;
+	  
+	  debugEconomicBuildings("TC SCALING COUNT MOD Max TC allowed : [" + nbTCEasy + " easy] [" + nbTCMedium + "medium] [" + nbTCHard + "hard]");
+	  debugEconomicBuildings("TC SCALING COUNT MOD Vanilla values : [1 easy] [2 moderate] [3 hard] nolimit for titan extreme legend");
+	  debugEconomicBuildings("TC SCALING COUNT MOD Currently got : " + numAliveTC + " TC");
+      int maxTownCenters = selectByDifficulty(nbTCEasy, nbTCMedium, nbTCHard);
       // Conquerors can build 1 extra Town Center on lower difficulties.
       if (cPersonalityCurrent == cPersonalityConqueror)
       {
