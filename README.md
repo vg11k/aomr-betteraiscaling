@@ -48,3 +48,7 @@ Based on the number of players on the map (assert there are 1TC & 2 colonies spa
 Feel free to ping me on the #myth-modding channel in the official AoE discord if you have questions.
 
 Enjoy.
+
+|![Vanilla chart of TC count evolution by players](/assets/TC vanilla chart.JPG)|![Modded chart of TC count evolution by players](/assets/TC modded chart.JPG)|
+|--|--|
+|Vanilla max colony by nb players and difficulties|Modded max colony by nb players and difficulties |
