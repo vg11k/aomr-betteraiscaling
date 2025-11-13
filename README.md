@@ -49,13 +49,82 @@ Feel free to ping me on the #myth-modding channel in the official AoE discord if
 
 Enjoy.
 
+#
+
 <table>
   <tr>
     <td><img src="/assets/TC vanilla chart.JPG"></td>
     <td><img src="/assets/TC modded chart.JPG"></td>
   </tr>
   <tr>
-    <td><img src="Vanilla max colony by nb players and difficulties"></td>
-    <td><img src="Modded max colony by nb players and difficulties"></td>
+    <td><p>Vanilla max colony by nb players and difficulties</p></td>
+    <td><p>Modded max colony by nb players and difficulties</p></td>
   </tr>
 </table>
+
+#
+
+<table>
+  <tr>
+    <td><img src="/assets/TC ranged vanilla chart.JPG"></td>
+    <td><img src="/assets/TC ranged modded chart.JPG"></td>
+  </tr>
+  <tr>
+    <td><p>Vanilla distance max between colony and main town by nb players</p></td>
+    <td><p>Modded distance max between colony and main town by nb players</p></td>
+  </tr>
+</table>
+
+#
+
+<table>
+  <tr>
+    <td><img src="/assets/Villagers vanilla pop chart.JPG"></td>
+    <td><img src="/assets/Villagers modded pop chart.JPG"></td>
+  </tr>
+  <tr>
+    <td><p>Vanilla max villagers by nb player and difficulties (cap 100)</p></td>
+    <td><p>Modded max villagers by nb player & difficulties(cap 100)</p></td>
+  </tr>
+</table>
+
+#
+
+#
+
+<table>
+  <tr>
+    <td><img src="/assets/Military vanilla pop chart.JPG"></td>
+    <td><img src="/assets/Military modded pop chart.JPG"></td>
+  </tr>
+  <tr>
+    <td><p>Vanilla max military unit by nb players and difficulty 
+(no caravan no fishing boat for the example)</p></td>
+    <td><p>Modded max military unit by nb players and difficulty
+if stockpile > 2000 & built TC < (nb players / 3)
+(no caravan no fishing boat for the example)</p></td>
+  </tr>
+</table>
+
+#
+
+<table>
+  <tr>
+    <td><img src="/assets/Military modded hard difficulty incr chart.JPG"></td>
+  </tr>
+  <tr>
+    <td><p>Modded max military unit by nb players for HARD AI 
+if stockpile > 2k & built TC >= (nb players / 3).
+Scaling from smallest ratio between
+resources (stockpile/10k ) & TC(current/max buildable)
+(no caravan no fishing boat for the example)</p></td>
+  </tr>
+</table>
+
+
+
+
+
+
+
+
