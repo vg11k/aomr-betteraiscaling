@@ -199,7 +199,7 @@ minInterval 15
       }
       vector unitPosition = kbUnitGetPosition(units[i]);
       int tcID = getClosestUnitByLocationConnectedAreaGroup(cUnitTypeAbstractSocketedTownCenter, cMyID, cUnitStateAlive,
-         unitPosition, 9999.0, cPassabilityLand);
+         unitPosition, 9999.0, cPassabilityAmphibious);
       if (tcID == -1)
       {
          continue;
@@ -240,7 +240,7 @@ minInterval 5
       int herdableID = kbUnitQueryGetResult(queryID, i);
       vector herdablePosition = kbUnitGetPosition(herdableID);
       int townCenterID = getClosestUnitByLocationConnectedAreaGroup(cUnitTypeAbstractSocketedTownCenter, cMyID, cUnitStateABQ,
-         herdablePosition, cMaxFloat, cPassabilityLand);
+         herdablePosition, cMaxFloat, cPassabilityAmphibious);
       if (townCenterID == -1)
       {
          debugEconomicUnits("Couldn't find a Town Center to move herdable(" + herdableID + ") to.");

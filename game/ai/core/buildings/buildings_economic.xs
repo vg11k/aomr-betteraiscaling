@@ -60,7 +60,7 @@ minInterval 5
    }
    if (needSwapMainBase == false && gLandAreaGroupID != -1 &&
        kbPathAreAreaGroupsConnected(gLandAreaGroupID,
-       kbAreaGroupGetIDByPosition(kbBaseGetLocation(cMyID, mainBaseID)), cPassabilityLand) == false)
+       kbAreaGroupGetIDByPosition(kbBaseGetLocation(cMyID, mainBaseID)), cPassabilityAmphibious) == false)
    {
       debugEconomicBuildings("We should swap mainbases because our old one isn't connected to gLandAreaGroupID.");
       needSwapMainBase = true;
@@ -97,7 +97,7 @@ minInterval 15
    int queryID = useSimpleUnitQuery(cUnitTypeAbstractSocketedTownCenter, cMyID, cUnitStateAlive);
    if (gLandAreaGroupID != -1)
    {
-      kbUnitQuerySetConnectedAreaGroupID(queryID, gLandAreaGroupID, cPassabilityLand);
+      kbUnitQuerySetConnectedAreaGroupID(queryID, gLandAreaGroupID, cPassabilityAmphibious);
    }
    int numResults = kbUnitQueryExecute(queryID);
    int[] results = kbUnitQueryGetResults(queryID);
@@ -215,7 +215,7 @@ minInterval 30
    int queryID = useSimpleUnitQuery(cUnitTypeAbstractSocketedTownCenter, cMyID, cUnitStateAlive);
    if (gLandAreaGroupID != -1)
    {
-      kbUnitQuerySetConnectedAreaGroupID(queryID, gLandAreaGroupID, cPassabilityLand);
+      kbUnitQuerySetConnectedAreaGroupID(queryID, gLandAreaGroupID, cPassabilityAmphibious);
    }
    int numAliveTC = kbUnitQueryExecute(queryID);
    if (numAliveTC == 0)
@@ -231,7 +231,7 @@ minInterval 30
    queryID = useSimpleUnitQuery(cUnitTypeVillageCenter, cMyID, cUnitStateAlive);
    if (gLandAreaGroupID != -1)
    {
-      kbUnitQuerySetConnectedAreaGroupID(queryID, gLandAreaGroupID, cPassabilityLand);
+      kbUnitQuerySetConnectedAreaGroupID(queryID, gLandAreaGroupID, cPassabilityAmphibious);
    }
    int numAliveVCs = kbUnitQueryExecute(queryID);
 
@@ -319,7 +319,7 @@ void updateTCArrays()
       }
       if (gLandAreaGroupID != -1 &&
           kbPathAreAreaGroupsConnected(gLandAreaGroupID,
-          kbAreaGroupGetIDByPosition(kbBaseGetLocation(cMyID, baseID)), cPassabilityLand) == false)
+          kbAreaGroupGetIDByPosition(kbBaseGetLocation(cMyID, baseID)), cPassabilityAmphibious) == false)
       {
          debugEconomicBuildings("TC base: " + kbBaseGetNameByID(cMyID, baseID) + ", is not connected to gLandAreaGroupID, " +
             "remove from gTCBases.");
@@ -344,7 +344,7 @@ void updateTCArrays()
       }
       if (gLandAreaGroupID != -1 &&
           kbPathAreAreaGroupsConnected(gLandAreaGroupID,
-          kbAreaGroupGetIDByPosition(kbBaseGetLocation(cMyID, baseID)), cPassabilityLand) == false)
+          kbAreaGroupGetIDByPosition(kbBaseGetLocation(cMyID, baseID)), cPassabilityAmphibious) == false)
       {
          debugEconomicBuildings("TC base: " + kbBaseGetNameByID(cMyID, baseID) + ", is not connected to gLandAreaGroupID, " +
             "remove from gLostTCBases.");
@@ -409,7 +409,7 @@ void updateTCArrays()
       }
       if (gLandAreaGroupID != -1 &&
           kbPathAreAreaGroupsConnected(gLandAreaGroupID,
-          kbAreaGroupGetIDByPosition(kbBaseGetLocation(cMyID, baseID)), cPassabilityLand) == false)
+          kbAreaGroupGetIDByPosition(kbBaseGetLocation(cMyID, baseID)), cPassabilityAmphibious) == false)
       {
          debugEconomicBuildings("TC base: " + kbBaseGetNameByID(cMyID, baseID) + ", is not connected to gLandAreaGroupID, " +
             "remove from gTCBasesToRecapture.");
@@ -452,7 +452,7 @@ void updateTCArrays()
       }
       if (gLandAreaGroupID != -1 &&
           kbPathAreAreaGroupsConnected(gLandAreaGroupID,
-          kbAreaGroupGetIDByPosition(kbBaseGetLocation(cMyID, baseID)), cPassabilityLand) == false)
+          kbAreaGroupGetIDByPosition(kbBaseGetLocation(cMyID, baseID)), cPassabilityAmphibious) == false)
       {
          continue;
       }
@@ -554,19 +554,19 @@ minInterval 30
       float percentageEcoPopNeeded = 0.30;
       if (numAliveTC == 2)
       {
-         percentageEcoPopNeeded = 0.40;
+         percentageEcoPopNeeded = 0.70;
       }
       else if (numAliveTC == 3)
       {
-         percentageEcoPopNeeded = 0.50;
+         percentageEcoPopNeeded = 0.80;
       }
       else if (numAliveTC >= 4)
       {
-         percentageEcoPopNeeded = 0.60;
+         percentageEcoPopNeeded = 0.90;
       }
       if (cPersonalityCurrent == cPersonalityConqueror)
       {
-         percentageEcoPopNeeded -= 0.10;
+         percentageEcoPopNeeded -= 0.20;
       }
 
       // On a land map the naval syscalls will give back -1 and skew the calc a little, it's fine...
@@ -789,7 +789,7 @@ minInterval 30
    int mainBaseID = kbBaseGetMainID(cMyID);
    debugEconomicBuildings("We're now going to scan for the closest Settlement to our mainbase that's on a connected area group.");
    int closestSettlementID = getClosestUnitByLocationConnectedAreaGroup(cUnitTypeSettlement, 0, cUnitStateAlive,
-      kbBaseGetLocation(cMyID, mainBaseID), searchRange, cPassabilityLand);
+      kbBaseGetLocation(cMyID, mainBaseID), searchRange, cPassabilityAmphibious);
    if (closestSettlementID != -1)
    {
       vector settlementPosition = kbUnitGetPosition(closestSettlementID);
@@ -797,7 +797,7 @@ minInterval 30
       // Also don't do this when we're a retaliator since we can unintentionally get into combat.
       if (cPersonalityCurrent == cPersonalityPassive || cPersonalityCurrent == cPersonalityRetaliator)
       {   
-         int enemyBaseID = kbFindClosestBase(-1, cPlayerRelationEnemyNotGaia, settlementPosition, cPassabilityLand, false);
+         int enemyBaseID = kbFindClosestBase(-1, cPlayerRelationEnemyNotGaia, settlementPosition, cPassabilityAmphibious, false);
          if (enemyBaseID != -1)
          {
             int baseOwner = kbBaseGetOwner(enemyBaseID);
@@ -819,7 +819,7 @@ minInterval 30
       // Create a full path that doesn't check for danger. We do this because our builders will also take a straight path to the
       // foundation. If we avoid danger we could end up pathing around the enemies with this area path but our builders would
       // definitely walk through the enemy.
-      if (kbPathCreateAreaPath(pathID, mainBaseAreaID, areaID, cPassabilityLand) == false)
+      if (kbPathCreateAreaPath(pathID, mainBaseAreaID, areaID, cPassabilityAmphibious) == false)
       {
          debugEconomicBuildings("Couldn't create an area path towards this settlement, but it's meant to be on " +
             "a connected area group. This must be blocked by a forest.");
@@ -1804,7 +1804,7 @@ minInterval 30
    int shrineQueryID = useSimpleUnitQuery(cUnitTypeShrineJapanese);
    if (gLandAreaGroupID != -1)
    {
-      kbUnitQuerySetConnectedAreaGroupID(shrineQueryID, gLandAreaGroupID, cPassabilityLand);
+      kbUnitQuerySetConnectedAreaGroupID(shrineQueryID, gLandAreaGroupID, cPassabilityAmphibious);
    }
    int numShrineResults = kbUnitQueryExecute(shrineQueryID);
    int[] availableShrines = new int(0, 0);
@@ -1876,7 +1876,7 @@ minInterval 30
    int mikoQueryID = useSimpleUnitQuery(cUnitTypeMiko);
    if (gLandAreaGroupID != -1)
    {
-      kbUnitQuerySetConnectedAreaGroupID(mikoQueryID, gLandAreaGroupID, cPassabilityLand);
+      kbUnitQuerySetConnectedAreaGroupID(mikoQueryID, gLandAreaGroupID, cPassabilityAmphibious);
    }
    int numMikoResults = kbUnitQueryExecute(mikoQueryID);
    for (int i = 0; i < numMikoResults; i++)
