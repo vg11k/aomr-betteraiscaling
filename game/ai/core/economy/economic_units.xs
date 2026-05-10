@@ -199,7 +199,7 @@ minInterval 15
       }
       vector unitPosition = kbUnitGetPosition(units[i]);
       int tcID = getClosestUnitByLocationConnectedAreaGroup(cUnitTypeAbstractSocketedTownCenter, cMyID, cUnitStateAlive,
-         unitPosition, 9999.0, cPassabilityAmphibious);
+         unitPosition, 9999.0, cPassabilityLand);
       if (tcID == -1)
       {
          continue;
@@ -245,7 +245,7 @@ minInterval 5
       int herdableID = kbUnitQueryGetResult(queryID, i);
       vector herdablePosition = kbUnitGetPosition(herdableID);
       int townCenterID = getClosestUnitByLocationConnectedAreaGroup(cUnitTypeAbstractSocketedTownCenter, cMyID, cUnitStateABQ,
-         herdablePosition, cMaxFloat, cPassabilityAmphibious);
+         herdablePosition, cMaxFloat, cPassabilityLand);
       if (townCenterID == -1)
       {
          debugEconomicUnits("Couldn't find a Town Center to move herdable(" + herdableID + ") to.");
@@ -1561,7 +1561,7 @@ minInterval 10
    // gMaxMilitaryPop is used to control how much military lower difficulties are allowed to make, period.
    // Even if the AI has tons of excess resources or max eco pop we never want to unlock military pop for these lower difficulties.
    // We will instead use this number, it is calculated by multiplying our total eco (land + naval) * gMilitaryToEcoRatio.
-   if (cDifficultyCurrent <= cDifficultyHard)
+   if (cDifficultyCurrent <= cDifficultyEasy)
    {
       // If we have infinite starting resources all our numbers above will be low since we don't need to gather.
       // But our military pop should then not also become very low.

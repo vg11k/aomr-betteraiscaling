@@ -97,7 +97,7 @@ minInterval 15
    int queryID = useSimpleUnitQuery(cUnitTypeAbstractSocketedTownCenter, cMyID, cUnitStateAlive);
    if (gLandAreaGroupID != -1)
    {
-      kbUnitQuerySetConnectedAreaGroupID(queryID, gLandAreaGroupID, cPassabilityAmphibious);
+      kbUnitQuerySetConnectedAreaGroupID(queryID, gLandAreaGroupID, cPassabilityLand);
    }
    int numResults = kbUnitQueryExecute(queryID);
    int[] results = kbUnitQueryGetResults(queryID);
