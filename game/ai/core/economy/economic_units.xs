@@ -214,7 +214,7 @@ minInterval 15
 
 //==============================================================================
 // moveHerdablesToBase
-// Moves all the herdables we own and aren't next to the Town Center to our Town Center.
+// Moves all the herdables we own and aren't next to a Town Center to it.
 // God powers can create herdables in whatever game we're in, so keep this running.
 //==============================================================================
 rule moveHerdablesToBase
@@ -223,6 +223,11 @@ group defaultArchaicRules
 minInterval 5
 {
    if (cStartingResourcesCurrent == cStartingResourcesInfinite)
+   {
+      xsDisableRule("moveHerdablesToBase");
+      return;
+   }
+   if (cMyCiv == cCivDemeter) // Has custom logic in moveHerdablesToBaseDemeter.
    {
       xsDisableRule("moveHerdablesToBase");
       return;
@@ -262,6 +267,126 @@ minInterval 5
    {
       int tcID = kbUnitQueryGetResult(queryID, i);
       kbResourceCombineHerdableResourcesAroundUnit(tcID, 13.0);
+   }
+}
+
+//==============================================================================
+// moveHerdablesToBaseDemeter
+// Moves all the herdables we own and aren't next to a Temple to it.
+// God powers can create herdables in whatever game we're in, so keep this running.
+//==============================================================================
+rule moveHerdablesToBaseDemeter
+inactive
+group defaultArchaicRules
+minInterval 5
+{
+   if (cStartingResourcesCurrent == cStartingResourcesInfinite)
+   {
+      xsDisableRule("moveHerdablesToBaseDemeter");
+      return;
+   }
+   if (cMyCiv != cCivDemeter)
+   {
+      xsDisableRule("moveHerdablesToBaseDemeter");
+      return;
+   }
+   if (checkStrategyFlag(cStrategyFlagAutomaticHerding) == false)
+   {
+      return;
+   }
+   debugEconomicUnits("--- Running Rule moveHerdablesToBaseDemeter. ---");
+
+   const float range = 13.0;
+   const int maxHerdablesPerTemple = 10;
+
+   int templeQueryID = useSimpleUnitQuery(cUnitTypeAbstractTemple);
+   int numTemples = kbUnitQueryExecute(templeQueryID);
+   int[] temples = kbUnitQueryGetResults(templeQueryID);
+   int[] templeAreaGroupIDs = new int(numTemples, -1);
+   int[] herdablesNextToTemples = new int(numTemples, 0);
+   for (int i = 0; i < numTemples; i++)
+   {
+      templeAreaGroupIDs[i] = kbUnitGetAreaGroupID(temples[i]);
+   }
+
+   int queryID = useSimpleUnitQuery(cUnitTypeHerdable);
+   int numResults = kbUnitQueryExecute(queryID);
+   bool[] herdableAlreadyWorkingOnTemple = new bool(numResults, false);
+   for (int i = 0; i < numResults; i++)
+   {
+      int herdableID = kbUnitQueryGetResult(queryID, i);
+      int targetID = kbUnitGetTargetUnitID(herdableID);
+      int index = temples.find(targetID);
+      if (index >= 0)
+      {
+         herdablesNextToTemples[index] = herdablesNextToTemples[index] + 1;
+         herdableAlreadyWorkingOnTemple[i] = true; // These aren't tasked again.
+      }
+   }
+   for (int i = 0; i < numTemples; i++)
+   {
+      debugEconomicUnits("Temple: " + temples[i] + " is on areaGroupID: " + templeAreaGroupIDs[i] + " and already has " +
+         herdablesNextToTemples[i] + " Herdables next to/pathing to it.");
+   }
+
+   for (int i = 0; i < numResults; i++)
+   {
+      int herdableID = kbUnitQueryGetResult(queryID, i);
+      if (herdableAlreadyWorkingOnTemple[i] == true)
+      {
+         continue;
+      }
+
+      bool foundTemple = false;
+      int herdableAreaGroupID = kbUnitGetAreaGroupID(herdableID);
+      for (int j = 0; j < numTemples; j++)
+      {
+         if (kbPathAreAreaGroupsConnected(herdableAreaGroupID, templeAreaGroupIDs[j], cPassabilityLand) == false)
+         {
+            continue;
+         }
+         if (herdablesNextToTemples[j] >= maxHerdablesPerTemple)
+         {
+            continue;
+         }
+         herdablesNextToTemples[j] = herdablesNextToTemples[j] + 1;
+         debugEconomicUnits("Sent herdable: " + herdableID + " to Temple: " + temples[j] + ".");
+         aiTaskWorkUnit(herdableID, temples[j]);
+         foundTemple = true;
+         break;
+      }
+      if (foundTemple == true)
+      {
+         continue;
+      }
+
+      debugEconomicUnits("Couldn't find a valid Temple for Herdable " + herdableID + ", trying backup plan now.");
+
+      vector herdablePosition = kbUnitGetPosition(herdableID);
+      int townCenterID = getClosestUnitByLocationConnectedAreaGroup(cUnitTypeAbstractSocketedTownCenter, cMyID, cUnitStateABQ,
+         herdablePosition, cMaxFloat, cPassabilityLand);
+      if (townCenterID == -1)
+      {
+         debugEconomicUnits("Couldn't find a Town Center to move herdable(" + herdableID + ") to either, it will idle now!");
+         continue;
+      }
+      float distanceFromTC = xsVectorLength(kbUnitGetPosition(townCenterID) - herdablePosition);
+      // Anything further away than 13 distance should be sent to the Town Center.
+      // This distance means that herdables that are properly next to the Town Center won't be picked up.
+      if (distanceFromTC > range)
+      {
+         debugEconomicUnits("Sent herdable: " + herdableID + " to Town Center: " + townCenterID + ".");
+         aiTaskWorkUnit(herdableID, townCenterID);
+      }
+      else
+      {
+         debugEconomicUnits("Herdable " + herdableID + " is already close to a Town Center.");
+      }
+   }
+
+   for (int i = 0; i < numTemples; i++)
+   {
+      kbResourceCombineHerdableResourcesAroundUnit(temples[i], range);
    }
 }
 
@@ -428,6 +553,52 @@ minInterval 30
    {
       aiPlanSetPriority(gFishingShipMaintainPlan, 70);
    }
+}
+
+//==============================================================================
+// LykaonMaintainMonitor
+// Train a few Lykaons for the sake of it.
+//==============================================================================
+rule LykaonMaintainMonitor
+inactive
+group defaultHeroicRules
+minInterval 30
+{
+   if (cStartingResourcesCurrent == cStartingResourcesInfinite)
+   {
+      xsDisableRule("LykaonMaintainMonitor");
+      return;
+   }
+   if (cMyCiv != cCivDemeter)
+   {
+      xsDisableRule("LykaonMaintainMonitor");
+      return;
+   }
+   if (kbProtoUnitAvailable(cUnitTypeLykaonVillager) == false)
+   {
+      xsDisableRule("LykaonMaintainMonitor");
+      return;
+   }
+   if (checkStrategyFlag(cStrategyFlagAutomaticVillagerTraining) == false)
+   {
+      return;
+   }
+
+   if (aiPlanGetNumberByTypeAndVariableIntValue(cPlanTrain, cTrainPlanUnitType, cUnitTypeLykaonVillager) > 0)
+   {
+      debugEconomicUnits("We already have a train plan for more Lykaon Villagers, can't stack multiple.");
+      return;
+   }
+
+   int maxLykaons = selectByDifficulty(1, 2, 3, 4, 5, 6);
+   int currentLykaonCount = kbUnitCount(cUnitTypeLykaonVillager, cMyID, cUnitStateAlive);
+   if (currentLykaonCount >= maxLykaons)
+   {
+      debugEconomicUnits("We already have " + currentLykaonCount + "/" + maxLykaons + " Lykaons, not training more.");
+      return;
+   }
+   // Train 1 at a time.
+   createSimpleTrainPlan(cUnitTypeLykaonVillager, 1, gLandAreaGroupID, gEconomicUnitsCategoryID);
 }
 
 //==============================================================================
@@ -804,7 +975,7 @@ minInterval 30
    // Culture specific parts.
 
    if (cMyCulture == cCultureGreek || cMyCulture == cCultureEgyptian || cMyCulture == cCultureAtlantean ||
-       cMyCulture == cCultureJapanese)
+       cMyCulture == cCultureJapanese || cMyCulture == cCultureAztec)
    {
       // Create the plan if it isn't valid (anymore).
       if (aiPlanGetIsIDValid(gVillagerMaintainPlan) == false)
