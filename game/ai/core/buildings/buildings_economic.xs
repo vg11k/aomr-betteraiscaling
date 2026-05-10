@@ -1933,3 +1933,305 @@ minInterval 30
       aiPlanAddUnit(existingShrineBuildPlanID, mikoID);
    }
 }
+
+//==============================================================================
+// calpulliVariationMonitor
+//==============================================================================
+rule calpulliVariationMonitor
+inactive
+group defaultClassicalRules
+minInterval 30
+{
+   if (checkStrategyFlag(cStrategyFlagAutomaticCalpulliVariations) == false)
+   {
+      return;
+   }
+   debugEconomicBuildings("--- Running Rule calpulliVariationMonitor. ---");
+
+   // Track which Calpullis have what addition. Since there's only ever 1 of each we can do it this way.
+   static int livestockPenID = -1;
+   static int warRoomID = -1;
+   static int craftWorkshopID = -1;
+
+   const int cMinimumRequiredFarmCountLivestockPen = 5;
+
+   int livestockPenResearchPlanID = aiPlanGetIDByTypeAndVariableIntValue(cPlanResearch, cResearchPlanTechID,
+      cTechCalpulliToLivestockPen);
+   int warRoomResearchPlanID = aiPlanGetIDByTypeAndVariableIntValue(cPlanResearch, cResearchPlanTechID,
+      cTechCalpulliToLumberOutpost);
+   int craftWorkshopResearchPlanID = aiPlanGetIDByTypeAndVariableIntValue(cPlanResearch, cResearchPlanTechID,
+      cTechCalpulliToCraftWorkshop);
+
+   // Check if our Calpullis are still alive at all.
+   if (livestockPenID != -1 && kbUnitGetIsIDValid(livestockPenID) == false)
+   {
+      if (livestockPenResearchPlanID >= 0)
+      {
+         aiPlanDestroy(livestockPenResearchPlanID);
+         livestockPenResearchPlanID = -1;
+      }
+      livestockPenID = -1;
+      debugEconomicBuildings("Our livestock pen Calpulli died, we can try and make a new one now.");
+   }
+   if (warRoomID != -1 && kbUnitGetIsIDValid(warRoomID) == false)
+   {
+      if (warRoomResearchPlanID >= 0)
+      {
+         aiPlanDestroy(warRoomResearchPlanID);
+         warRoomResearchPlanID = -1;
+      }
+      warRoomID = -1;
+      debugEconomicBuildings("Our war room Calpulli died, we can try and make a new one now.");
+   }
+   if (craftWorkshopID != -1 && kbUnitGetIsIDValid(craftWorkshopID) == false)
+   {
+      if (craftWorkshopResearchPlanID >= 0)
+      {
+         aiPlanDestroy(craftWorkshopResearchPlanID);
+         craftWorkshopResearchPlanID = -1;
+      }
+      craftWorkshopID = -1;
+      debugEconomicBuildings("Our craft workshop Calpulli died, we can try and make a new one now.");
+   }
+
+   // Check if our modified Calpullis should remain modified.
+   // If they shouldn't remain modified it doesn't mean we will turn them back to normal instantly.
+   // We just allow others to take their place.
+   if (livestockPenID != -1)
+   {
+      int farmCount = getUnitCountByLocation(cUnitTypeAbstractFarm, cMyID, cUnitStateABQ, kbUnitGetPosition(livestockPenID), 15.0);
+      if (farmCount < cMinimumRequiredFarmCountLivestockPen)
+      {
+         debugEconomicBuildings("Our livestock pen Calpulli: " + livestockPenID + " no longer has sufficient Farms close: "
+            + farmCount + ", we can now select another Calpulli to modify.");
+         livestockPenID = -1;
+         if (livestockPenResearchPlanID >= 0)
+         {
+            aiPlanDestroy(livestockPenResearchPlanID);
+            livestockPenResearchPlanID = -1;
+         }
+      }
+      else
+      {
+         debugEconomicBuildings("Our livestock pen Calpulli: " + livestockPenID + " still has sufficient Farms close: " + farmCount +
+            ", do nothing.");
+      }
+   }
+
+   if (warRoomID != -1)
+   {
+      int numPlans = kbUnitGetNumberUsedByPlans(warRoomID);
+      bool foundWoodGatherPlan = false;
+      for (int i = 0; i < numPlans; i++)
+      {
+         int planID = kbUnitGetUsedByPlanID(warRoomID, i);
+         if (aiPlanGetIsIDValid(planID) == false)
+         {
+            debugEconomicBuildings("---  FAIL");
+            continue;
+         }
+         if (aiPlanGetType(planID) == cPlanGather && aiPlanGetVariableInt(planID, cGatherPlanResourceType, 0) == cResourceWood)
+         {
+            foundWoodGatherPlan = true;
+            break;
+         }
+      }
+      if (foundWoodGatherPlan == false)
+      {
+         debugEconomicBuildings("Our war room Calpulli: " + warRoomID + " no longer has a wood gather plan associated with it" +
+            ", we can now select another Calpulli to modify.");
+         warRoomID = -1;
+         if (warRoomResearchPlanID >= 0)
+         {
+            aiPlanDestroy(warRoomResearchPlanID);
+            warRoomResearchPlanID = -1;
+         }
+      }
+      else
+      {
+         debugEconomicBuildings("Our war room Calpulli: " + warRoomID + " still has a wood gather plan associated with it" +
+            ", do nothing.");
+      }
+   }
+
+   if (craftWorkshopID != -1)
+   {
+      int numPlans = kbUnitGetNumberUsedByPlans(craftWorkshopID);
+      bool foundGoldGatherPlan = false;
+      for (int i = 0; i < numPlans; i++)
+      {
+         int planID = kbUnitGetUsedByPlanID(craftWorkshopID, i);
+         if (aiPlanGetIsIDValid(planID) == false)
+         {
+            debugEconomicBuildings("---  FAIL");
+            continue;
+         }
+         if (aiPlanGetType(planID) == cPlanGather && aiPlanGetVariableInt(planID, cGatherPlanResourceType, 0) == cResourceGold)
+         {
+            foundGoldGatherPlan = true;
+            break;
+         }
+      }
+      if (foundGoldGatherPlan == false)
+      {
+         debugEconomicBuildings("Our craft workshop Calpulli: " + craftWorkshopID + " no longer has a gold gather plan associated with it" +
+            ", we can now select another Calpulli to modify.");
+         craftWorkshopID = -1;
+         if (craftWorkshopResearchPlanID >= 0)
+         {
+            aiPlanDestroy(craftWorkshopResearchPlanID);
+            craftWorkshopResearchPlanID = -1;
+         }
+      }
+      else
+      {
+         debugEconomicBuildings("Our craft workshop Calpulli: " + craftWorkshopID + " still has a gold gather plan associated with it" +
+            ", do nothing.");
+      }
+   }
+
+   ///////////////////////////////////////
+   // Part 2: analyze new Calpullis to transform.
+   ///////////////////////////////////////
+
+   if (livestockPenID >= 0 && warRoomID >= 0 && craftWorkshopID >= 0)
+   {
+      debugEconomicBuildings("We already have all three Calpulli variations either active, can't get new ones.");
+      return;
+   }
+   
+   if (livestockPenResearchPlanID >= 0 || warRoomResearchPlanID >= 0 || craftWorkshopResearchPlanID >= 0)
+   {
+      debugEconomicBuildings("We already have an active research plan going, don't stack them.");
+      return;
+   }
+   
+   // Get the info we will need for all 3 variations.
+   int queryID = useSimpleUnitQuery(cUnitTypeCalpulli);
+   kbUnitQuerySetAreaGroupID(queryID, gLandAreaGroupID);
+   int calpulliCount = kbUnitQueryExecute(queryID);
+
+   if (livestockPenID == -1 && livestockPenResearchPlanID == -1)
+   {
+      bool madePlan = false;
+      for (int i = 0; i < calpulliCount; i++)
+      {
+         int calpulliID = kbUnitQueryGetResult(queryID, i);
+         int farmCount = getUnitCountByLocation(cUnitTypeAbstractFarm, cMyID, cUnitStateABQ, kbUnitGetPosition(calpulliID), 15.0);
+         if (farmCount >= cMinimumRequiredFarmCountLivestockPen)
+         {
+            debugEconomicBuildings("Found Calpulli " + calpulliID + " with " + farmCount +
+               " Farms around it, transform it into a livestock pen.");
+            int planID = createSimpleResearchPlanSpecificResearcher(cTechCalpulliToLivestockPen, calpulliID);
+            aiPlanSetVariableInt(planID, cResearchPlanTransformToPUID, 0, cUnitTypeCalpulliLivestockPen);
+            livestockPenID = calpulliID;
+            madePlan = true;
+            break;
+         }
+      }
+      if (madePlan == false)
+      {
+         debugEconomicBuildings("Didn't find a suitable Calpulli to transform into a livestock pen.");
+      }
+      else
+      {
+         return; // Create one plan at a time.
+      }
+   }
+   else
+   {
+      debugEconomicBuildings("We already have a proper livestock pen Calpulli, or a research plan to get one.");
+   }
+
+   if (warRoomID == -1 && warRoomResearchPlanID == -1)
+   {
+      bool madePlan = false;
+      for (int i = 0; i < calpulliCount; i++)
+      {
+         int calpulliID = kbUnitQueryGetResult(queryID, i);
+         int numPlans = kbUnitGetNumberUsedByPlans(calpulliID);
+         bool foundWoodGatherPlan = false;
+         for (int j = 0; j < numPlans; j++)
+         {
+            int planID = kbUnitGetUsedByPlanID(calpulliID, j);
+            if (aiPlanGetIsIDValid(planID) == false)
+            {
+               debugEconomicBuildings("---  FAIL");
+               continue;
+            }
+            if (aiPlanGetType(planID) == cPlanGather && aiPlanGetVariableInt(planID, cGatherPlanResourceType, 0) == cResourceWood)
+            {
+               foundWoodGatherPlan = true;
+               break;
+            }
+         }
+         if (foundWoodGatherPlan == true)
+         {
+            debugEconomicBuildings("Found Calpulli " + calpulliID + " with an active wood gather plan, transform it into a war room.");
+            int planID = createSimpleResearchPlanSpecificResearcher(cTechCalpulliToLumberOutpost, calpulliID);
+            aiPlanSetVariableInt(planID, cResearchPlanTransformToPUID, 0, cUnitTypeCalpulliLumberOutpost);
+            warRoomID = calpulliID;
+            madePlan = true;
+            break;
+         }
+      }
+      if (madePlan == false)
+      {
+         debugEconomicBuildings("Didn't find a suitable Calpulli to transform into a war room.");
+      }
+      else
+      {
+         return; // Create one plan at a time.
+      }
+   }
+   else
+   {
+      debugEconomicBuildings("We already have a proper war room Calpulli, or a research plan to get one.");
+   }
+
+   if (craftWorkshopID == -1 && craftWorkshopResearchPlanID == -1)
+   {
+      bool madePlan = false;
+      for (int i = 0; i < calpulliCount; i++)
+      {
+         int calpulliID = kbUnitQueryGetResult(queryID, i);
+         int numPlans = kbUnitGetNumberUsedByPlans(calpulliID);
+         bool foundGoldGatherPlan = false;
+         for (int j = 0; j < numPlans; j++)
+         {
+            int planID = kbUnitGetUsedByPlanID(calpulliID, j);
+            if (aiPlanGetIsIDValid(planID) == false)
+            {
+               debugEconomicBuildings("---  FAIL");
+               continue;
+            }
+            if (aiPlanGetType(planID) == cPlanGather && aiPlanGetVariableInt(planID, cGatherPlanResourceType, 0) == cResourceGold)
+            {
+               foundGoldGatherPlan = true;
+               break;
+            }
+         }
+         if (foundGoldGatherPlan == true)
+         {
+            debugEconomicBuildings("Found Calpulli " + calpulliID + " with an active gold gather plan, transform it into a craft workshop.");
+            int planID = createSimpleResearchPlanSpecificResearcher(cTechCalpulliToCraftWorkshop, calpulliID);
+            aiPlanSetVariableInt(planID, cResearchPlanTransformToPUID, 0, cUnitTypeCalpulliCraftWorkshop);
+            craftWorkshopID = calpulliID;
+            madePlan = true;
+            break;
+         }
+      }
+      if (madePlan == false)
+      {
+         debugEconomicBuildings("Didn't find a suitable Calpulli to transform into a craft workshop.");
+      }
+      else
+      {
+         return; // Create one plan at a time.
+      }
+   }
+   else
+   {
+      debugEconomicBuildings("We already have a proper craft workshop Calpulli, or a research plan to get one.");
+   }
+}
